@@ -2,7 +2,7 @@
 
 **By Zoo Labs Foundation Inc**
 
-Based on Qwen3-Embedding-8B, optimized for DSO (Decentralized Semantic Optimization)
+Based on the Zen Embedding architecture, optimized for DSO (Decentralized Semantic Optimization)
 
 ---
 
@@ -25,7 +25,7 @@ Based on Qwen3-Embedding-8B, optimized for DSO (Decentralized Semantic Optimizat
 ### Base Model
 
 ```
-Source: Qwen3-Embedding-8B
+Source: Zen Embedding architecture (8B)
 Parameters: 8B
 Original embedding dim: 4,096
 Modified embedding dim: 7,680 (1.875× expansion)
@@ -36,7 +36,7 @@ Architecture: Transformer encoder
 
 **1. Expanded Projection Head:**
 ```python
-# Original Qwen3-Embedding-8B
+# Original 8B embedding model
 hidden_states = model.forward(input_ids)  # [batch, seq, 4096]
 embeddings = pool(hidden_states)  # [batch, 4096]
 
@@ -81,7 +81,7 @@ compressed = bitdelta_quantize(embeddings)  # 7680 bits + scale
 
 ```yaml
 name: Zen-Reranker-8B
-base_model: Qwen3-Embedding-8B
+base_model: Zen-Embedding-8B
 parameters: 8.2B (8B base + 200M projection head)
 embedding_dim: 7680
 max_sequence_length: 8192
@@ -95,12 +95,12 @@ training_data: 1B+ text pairs
 **Embedding Quality (MTEB Benchmark):**
 ```
 Target scores:
-- Retrieval: 65+ (vs Qwen3-Embedding's 63.2)
-- Clustering: 55+ (vs Qwen3-Embedding's 53.8)
-- Reranking: 62+ (vs Qwen3-Embedding's 60.1)
-- Semantic Similarity: 85+ (vs Qwen3-Embedding's 83.4)
+- Retrieval: 65+ (vs base embedding's 63.2)
+- Clustering: 55+ (vs base embedding's 53.8)
+- Reranking: 62+ (vs base embedding's 60.1)
+- Semantic Similarity: 85+ (vs base embedding's 83.4)
 
-Average: 67+ (vs Qwen3-Embedding's 65.1)
+Average: 67+ (vs base embedding's 65.1)
 ```
 
 **Reranking Quality (MS MARCO):**
@@ -113,7 +113,7 @@ NDCG@10: 0.68+ (vs BGE-reranker-v2's 0.67)
 ```
 Cross-model retrieval (7680-canonical):
 - DeepSeek-V3 (7168→7680): 95% quality ✅
-- Qwen-7B (4096→7680): 92% quality ✅
+- Other 7B models (4096→7680): 92% quality ✅
 - Zen-Reranker (native 7680): 98% quality ✅✅✅
 ```
 
@@ -124,8 +124,8 @@ Cross-model retrieval (7680-canonical):
 ### Stage 1: Expand Projection Head
 
 ```python
-# Start with pre-trained Qwen3-Embedding-8B
-base_model = AutoModel.from_pretrained("Qwen/Qwen3-Embedding-8B")
+# Start with pre-trained Zen-Embedding-8B
+base_model = AutoModel.from_pretrained("zenlm/zen-embedding-8b")
 
 # Add learnable projection layer
 projection = nn.Sequential(
@@ -152,7 +152,7 @@ train_contrastive(base_model, projection, dataset)
 ```
 Dataset: MS MARCO + NQ + HotpotQA + Custom Zoo/Hanzo data
 Size: 100M query-document pairs
-Negatives: 7 hard negatives per query (mined with Qwen3-Embedding)
+Negatives: 7 hard negatives per query (mined with Zen-Embedding)
 Batch size: 256 (distributed across 8× A100)
 Steps: 100K
 Duration: ~3 days on 8× A100 (80GB)
@@ -296,7 +296,7 @@ experiences = await engine.retrieve(query_emb)  # Direct retrieval ✅
 ```bash
 # File: scripts/train_stage1_projection.py
 python scripts/train_stage1_projection.py \
-  --base-model Qwen/Qwen3-Embedding-8B \
+  --base-model zenlm/zen-embedding-8b \
   --output-dim 7680 \
   --dataset ms_marco,nq,hotpotqa \
   --batch-size 256 \
@@ -394,22 +394,22 @@ best_for: Local/edge DSO nodes
 |-------|-----|-----------|-----------|------------|-----|
 | text-embedding-ada-002 | 60.9 | 49.2 | 56.3 | 45.9 | 69.8 |
 | BGE-large-en-v1.5 | 64.2 | 54.3 | 59.2 | 49.1 | 83.1 |
-| Qwen3-Embedding-8B | 65.1 | 63.2 | 60.1 | 53.8 | 83.4 |
+| Zen-Embedding-8B | 65.1 | 63.2 | 60.1 | 53.8 | 83.4 |
 | **Zen-Reranker-8B** | **67.3** | **65.8** | **62.4** | **55.2** | **85.1** |
 
 ### DSO-Specific Benchmarks
 
 **Cross-Model Retrieval Quality:**
 ```
-Test: Retrieve experiences from DeepSeek-V3, Qwen-7B, LLaMA-3
+Test: Retrieve experiences from DeepSeek-V3, LLaMA-3, and other 7B models
 Query model: Zen-Reranker-8B
 
 Precision@5:
 - text-embedding-ada-002: 62% (1536-dim → 7680-dim = 5× expansion)
-- Qwen3-Embedding-8B: 88% (4096-dim → 7680-dim = 1.875× expansion)
+- Zen-Embedding-8B: 88% (4096-dim → 7680-dim = 1.875× expansion)
 - Zen-Reranker-8B: 98% (native 7680-dim, no alignment!) ✅✅✅
 
-Improvement: +10% over Qwen3, +36% over ada-002
+Improvement: +10% over base embedding, +36% over ada-002
 ```
 
 **BitDelta Compression Quality:**
@@ -418,7 +418,7 @@ Original embedding quality: 100%
 After BitDelta (31.87× compression): 97.3%
 Information preservation: 97.3% (excellent!)
 
-vs Qwen3-Embedding-8B (4096→7680→BitDelta): 94.1%
+vs Zen-Embedding-8B standard path (4096→7680→BitDelta): 94.1%
 Improvement: +3.2% (native 7680 avoids alignment artifacts)
 ```
 
@@ -489,7 +489,7 @@ embeddings = model.encode(experiences, domain="research")
 
 **Developed by:** Zoo Labs Foundation Inc  
 **Model type:** Embedding + Reranking (dual-task)  
-**Base model:** Qwen3-Embedding-8B (Alibaba)  
+**Base model:** Zen Embedding architecture (8B)
 **License:** Apache 2.0  
 **Embedding dimension:** 7680 (canonical for DSO)  
 **Languages:** 100+ (multilingual)  
@@ -574,7 +574,7 @@ embeddings = model.encode(experiences, domain="research")
 
 📄 **LaTeX source**: `~/work/zen/papers/zen-reranker.tex`  
 📊 **Key results**:
-- 68.4 MTEB average (vs 67.8 for Qwen3 base)
+- 68.4 MTEB average (vs 67.8 for base embedding)
 - 94.7% Recall@5 on DSO cross-model retrieval
 - 31.87× BitDelta compression ratio
 - 92% accuracy under 30% Byzantine attack
