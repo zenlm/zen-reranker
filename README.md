@@ -74,7 +74,7 @@ scores = model.predict([
 | Attribute | Value |
 |-----------|-------|
 | Parameters | 4B |
-| Architecture | Qwen3ForSequenceClassification |
+| Architecture | Transformer-based sequence classification |
 | Context | 32,768 tokens |
 | Languages | 100+ (multilingual) |
 | License | Apache 2.0 |
