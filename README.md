@@ -99,7 +99,7 @@ Like all Zen models, Zen Reranker is abliterated — refusal bias has been remov
 | [Zen Nano](https://huggingface.co/zenlm/zen-nano) | 0.6B | Edge AI |
 | [Zen Scribe](https://huggingface.co/zenlm/zen-scribe) | 4B | Writing |
 | [Zen Pro](https://huggingface.co/zenlm/zen-pro) | 8B | Professional AI |
-| [Zen Max](https://huggingface.co/zenlm/zen-max) | 671B MoE | Frontier |
+| [Zen Max](https://huggingface.co/zenlm/zen-5-max-gguf) | 671B MoE | Frontier |
 | [Zen Reranker](https://huggingface.co/zenlm/zen-reranker) | 4B | Retrieval |
 | [Zen Embedding](https://huggingface.co/zenlm/zen-embedding) | — | Embeddings |
 
