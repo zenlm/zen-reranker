@@ -1,0 +1,9 @@
+zen-reranker
+Copyright (c) 2026 Zen LM, Inc.
+
+This product includes software from Qwen3-Embedding
+(https://github.com/QwenLM/Qwen3-Embedding), specifically the Qwen3-Embedding-8B
+base model (https://huggingface.co/Qwen/Qwen3-Embedding-8B), developed by the
+Qwen team at Alibaba Cloud and licensed under Apache-2.0:
+
+    Copyright 2025 Alibaba Cloud
